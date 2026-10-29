@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chopper · 拾光集 — 开发者作品集与技术博客</title>
+  <meta name="description" content="Chopper的个人作品集与技术博客，记录在全栈开发、开源与写作之间的生长。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Noto+Sans+SC:wght@300;400;500&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="wrap nav">
+      <a href="index.html" class="brand">拾光集 <span class="en">ShiGuang</span></a>
+      <button class="nav-toggle" aria-label="菜单"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="index.html">首页</a></li>
+        <li><a href="works.html">作品</a></li>
+        <li><a href="blog.html">博客</a></li>
+        <li><a href="about.html">关于</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero -->
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <p class="eyebrow">Developer · Writer</p>
+          <h1>Chopper</h1>
+          <p class="h-en">Where code meets words.</p>
+          <p class="lead">于无常处知有情，于有情处知众生。这里是我的作品集与技术博客——记录在项目、开源与文字之间，缓慢而确凿地生长的样子。</p>
+          <div class="hero-actions">
+            <a href="works.html" class="btn btn--primary">查看作品 →</a>
+            <a href="blog.html" class="btn btn--ghost">读读博客</a>
+          </div>
+        </div>
+        <div>
+          <img class="avatar" src="assets/img/avatar.jpg" alt="Chopper的头像" />
+        </div>
+      </div>
+    </section>
+
+    <!-- 精选作品 -->
+    <section class="section">
+      <div class="wrap">
+        <p class="eyebrow">Selected Works</p>
+        <h2 class="section-title">精选作品</h2>
+        <p class="section-lead">几件我比较满意、也仍在持续打磨的项目。</p>
+        <div class="grid grid--works">
+          <article class="card">
+            <div class="thumb">Mindmap</div>
+            <span class="tag">学习地图</span>
+            <h3>Python 自动化测试学习导图</h3>
+            <p>从工程基础到 pytest、Playwright、Locust、Allure 与 AI 辅助测试，一张图梳理可落地的学习路径与工具选型。</p>
+            <div class="meta"><span>Python</span><span>pytest</span><span>Playwright</span></div>
+            <a href="works/python-testing-mindmap.html" class="more">查看导图 →</a>
+          </article>
+          <article class="card">
+            <div class="thumb">Verdant</div>
+            <span class="tag">Web 应用</span>
+            <h3>Verdant 协作白板</h3>
+            <p>基于 WebSocket 的实时协作画布，支持多人光标、图形与便签，前端用 Canvas 手写渲染引擎。</p>
+            <div class="meta"><span>React</span><span>Node</span><span>WebSocket</span></div>
+            <a href="works.html" class="more">了解更多 →</a>
+          </article>
+          <article class="card">
+            <div class="thumb">Lumen</div>
+            <span class="tag">开源工具</span>
+            <h3>Lumen 静态站点生成器</h3>
+            <p>零配置、以 Markdown 为中心的静态博客生成器，2.1k Stars，专注中文排版与阅读体验。</p>
+            <div class="meta"><span>Go</span><span>CLI</span><span>Open Source</span></div>
+            <a href="works.html" class="more">了解更多 →</a>
+          </article>
+          <article class="card">
+            <div class="thumb">Atlas</div>
+            <span class="tag">数据可视化</span>
+            <h3>Atlas 数据看板</h3>
+            <p>面向中小团队的可视化看板，拖拽式图表配置，内置十余种数据源连接器。</p>
+            <div class="meta"><span>Vue</span><span>D3</span><span>TypeScript</span></div>
+            <a href="works.html" class="more">了解更多 →</a>
+          </article>
+        </div>
+        <div style="margin-top:2rem"><a href="works.html" class="btn btn--ghost">浏览全部作品</a></div>
+      </div>
+    </section>
+
+    <!-- 数据 -->
+    <section class="section section--alt">
+      <div class="wrap grid grid--stats">
+        <div class="stat"><div class="num">6+</div><div class="label">年开发经验</div></div>
+        <div class="stat"><div class="num">40+</div><div class="label">完成项目</div></div>
+        <div class="stat"><div class="num">2.1k</div><div class="label">开源 Stars</div></div>
+        <div class="stat"><div class="num">30+</div><div class="label">技术文章</div></div>
+      </div>
+    </section>
+
+    <!-- 最新文章 -->
+    <section class="section">
+      <div class="wrap">
+        <p class="eyebrow">From the Blog</p>
+        <h2 class="section-title">最新文章</h2>
+        <p class="section-lead">关于工程、设计与一点点思考。</p>
+        <div class="grid grid--posts">
+          <article class="card post-card">
+            <div class="date">2026 · 10 · 28</div>
+            <h3>Python 自动化测试入门实战</h3>
+            <p>从第一个 pytest 用例到 Allure 报告：参数化、fixture、mock、Playwright + POM，配一套可运行的示例工程。</p>
+            <a href="blog/post-5.html" class="more">阅读全文 →</a>
+          </article>
+          <article class="card post-card">
+            <div class="date">2026 · 10 · 28</div>
+            <h3>第 8 章 Route Guidance（路线引导）深度解析</h3>
+            <p>拆解苹果 CarPlay 附录（iAP2）中，iPhone 如何把转向引导数据下发给车机，以及工程实现时必须踩准的硬指标。</p>
+            <a href="blog/post-4.html" class="more">阅读全文 →</a>
+          </article>
+          <article class="card post-card">
+            <div class="date">2026 · 10 · 12</div>
+            <h3>用 Canvas 手写一个协作白板渲染引擎</h3>
+            <p>从脏矩形重绘到光标插值，聊聊我在 Verdant 里踩过的性能坑。</p>
+            <a href="blog/post-1.html" class="more">阅读全文 →</a>
+          </article>
+          <article class="card post-card">
+            <div class="date">2026 · 09 · 28</div>
+            <h3>为什么我写了第三个静态站点生成器</h3>
+            <p>Lumen 的诞生记：对「写作体验」的偏执，以及如何把构建时间压到 200ms 内。</p>
+            <a href="blog/post-2.html" class="more">阅读全文 →</a>
+          </article>
+          <article class="card post-card">
+            <div class="date">2026 · 09 · 05</div>
+            <h3>清新文艺风，也能很工程化</h3>
+            <p>一套纯静态作品集主题的设计取舍：配色、排版与零依赖的坚持。</p>
+            <a href="blog/post-3.html" class="more">阅读全文 →</a>
+          </article>
+        </div>
+        <div style="margin-top:2rem"><a href="blog.html" class="btn btn--ghost">前往博客</a></div>
+      </div>
+    </section>
+
+    <!-- 联系 CTA -->
+    <section class="section section--alt">
+      <div class="wrap" style="text-align:center">
+        <h2 class="section-title">想聊聊项目或合作？</h2>
+        <p class="section-lead" style="margin-left:auto;margin-right:auto">无论是产品想法、技术难题，还是只想交个朋友，都欢迎写信给我。</p>
+        <a href="about.html#contact" class="btn btn--primary">联系我 →</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div>
+        <h4>Chopper · 拾光集</h4>
+        <p style="color:#c9c0b1;max-width:30ch;margin:0">在代码与文字之间，记录生长的样子。</p>
+      </div>
+      <div>
+        <h4>导航</h4>
+        <ul class="footer-links">
+          <li><a href="works.html">作品</a></li>
+          <li><a href="blog.html">博客</a></li>
+          <li><a href="about.html">关于</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>在外围</h4>
+        <ul class="footer-links">
+          <li><a href="https://github.com/" target="_blank" rel="noopener">GitHub</a></li>
+          <li><a href="mailto:hello@example.com">Email</a></li>
+          <li><a href="https://www.zhihu.com/" target="_blank" rel="noopener">知乎</a></li>
+        </ul>
+      </div>
+      <div class="footer-note">© <span id="year">2026</span> Chopper · 拾光集 · 基于纯静态构建，可托管于任意静态平台</div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Python 自动化测试入门实战：从第一个用例到 Allure 报告 · 拾光集</title>
+  <meta name="description" content="配套学习导图的实战篇：pytest 断言与参数化、fixture 与 conftest、mock、接口测试、Playwright + POM、覆盖率与 Allure 报告，附可运行示例工程。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Noto+Sans+SC:wght@300;400;500&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="wrap nav">
+      <a href="../index.html" class="brand">拾光集 <span class="en">ShiGuang</span></a>
+      <button class="nav-toggle" aria-label="菜单"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="../index.html">首页</a></li>
+        <li><a href="../works.html">作品</a></li>
+        <li><a href="../blog.html">博客</a></li>
+        <li><a href="../about.html">关于</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main>
+    <article class="section article">
+      <div class="article-header wrap">
+        <div class="date">2026 · 10 · 28</div>
+        <h1>Python 自动化测试入门实战：从第一个用例到 Allure 报告</h1>
+        <p class="excerpt">配套《Python 自动化测试学习导图》的实战篇。断言、参数化、fixture、mock、接口测试、Playwright + POM、覆盖率与报告，一条命令一条命令地走完。</p>
+      </div>
+
+      <div class="wrap article-body">
+        <p>上一篇我画了一张学习导图，把 Python 自动化测试要学的东西铺成了一张地图。地图看完，下一步就是落地。这篇不讲概念，只讲「怎么把第一个能跑的测试体系搭起来」——每一步都配了可以直接复制的代码。</p>
+
+        <p>技术选型很直接：<strong>pytest 做框架，requests + responses 做接口，Playwright 做 UI，pytest-cov 看覆盖率，Allure 出报告</strong>。这套组合在 2026 年是新项目最省心的默认解。</p>
+
+        <blockquote>配套示例工程已经跑通，目录在 <code>python-testing-demo/</code>：clone 下来装完依赖就能 <code>pytest</code>。文章里所有代码都来自它。</blockquote>
+
+        <h2>一、先把工程骨架立起来</h2>
+        <p>测试代码最容易死在「随手一放」：脚本散在各个目录，谁都能改，谁都不敢删。建议一开始就按约定分目录：</p>
+        <pre><code>python-testing-demo/
+├── pytest.ini                 测试配置：markers、pythonpath
+├── requirements.txt
+├── src/                       被测代码
+├── pages/                     页面对象模型（POM）
+└── tests/
+    ├── conftest.py            共享夹具
+    ├── test_calculator.py     参数化
+    ├── test_user_service.py   mock
+    ├── test_api_orders.py     接口
+    ├── fixtures/demo.html     UI 用例用的本地页面
+    └── ui/test_search.py      Playwright 用例</code></pre>
+
+        <p><code>pytest.ini</code> 是整个体系的开关，先写好它：</p>
+        <pre><code>[pytest]
+testpaths = tests
+pythonpath = .
+addopts = -ra
+markers =
+    smoke: 冒烟用例，最快的一批
+    api: 接口测试
+    ui: UI 端到端测试，需要浏览器
+    slow: 耗时用例</code></pre>
+        <ul>
+          <li><code>testpaths</code>：不敲路径也知道去哪儿找用例</li>
+          <li><code>pythonpath = .</code>：让 <code>import src.xxx</code> 直接可用（pytest ≥ 7）</li>
+          <li><code>markers</code>：先注册再使用，否则会刷一堆警告</li>
+        </ul>
+
+        <p>依赖就这些：</p>
+        <pre><code>pip install pytest requests responses pytest-mock pytest-cov \
+            pytest-playwright allure-pytest faker
+playwright install chromium        # 只有跑 UI 用例才需要</code></pre>
+
+        <h2>二、第一个测试：断言与异常</h2>
+        <p>pytest 的哲学是「用 Python 原生的 assert，别的都别管」。它会在失败时自动展开表达式的中间值，比任何断言库的报错都清楚。</p>
+        <pre><code>def test_divide_ok():
+    assert divide(10, 4) == 2.5
+
+
+def test_divide_by_zero_raises():
+    """异常断言要用 pytest.raises，别用 try/except 自己判断。"""
+    with pytest.raises(ValueError) as exc:
+        divide(1, 0)
+    assert "除数不能为 0" in str(exc.value)</code></pre>
+        <p>两个约定要记牢：文件名必须 <code>test_*.py</code>，函数必须 <code>test_*</code> 开头；比较浮点数用 <code>pytest.approx</code>，别直接 <code>==</code>。</p>
+
+        <h2>三、参数化：一份逻辑，多组数据</h2>
+        <p>写十遍差不多的用例是自动化测试最大的浪费。<code>parametrize</code> 把「数据」和「逻辑」分开，加一组边界值只需要加一行：</p>
+        <pre><code>@pytest.mark.smoke
+@pytest.mark.parametrize(
+    "a, b, expected",
+    [
+        (1, 2, 3),
+        (0, 0, 0),
+        (-1, 1, 0),
+        (10 ** 6, 10 ** 6, 2 * 10 ** 6),
+    ],
+    ids=["small", "zero", "negative", "big"],   # 让报告里的名字可读
+)
+def test_add(a, b, expected):
+    assert add(a, b) == expected</code></pre>
+        <p><code>ids</code> 是个容易被忽略的好习惯：默认参数化用例名是 <code>test_add[1-2-3]</code>，加了 ids 之后变成 <code>test_add[zero]</code>，失败时一眼就知道是哪组数据。</p>
+
+        <h2>四、fixture 与 conftest：测试的地基</h2>
+        <p>fixture 是 pytest 最值得花时间学的东西。它同时承担三件事：前置准备、后置清理、依赖注入。</p>
+        <pre><code>@pytest.fixture(scope="session")
+def base_url(env):
+    return {
+        "test": "https://api.test.example.com",
+        "staging": "https://api.staging.example.com",
+        "prod": "https://api.example.com",
+    }[env]
+
+
+@pytest.fixture
+def api_client(base_url):
+    """yield 之前是前置，yield 之后是后置（一定会执行，哪怕用例失败）。"""
+    import requests
+
+    session = requests.Session()
+    session.headers.update({"Authorization": "Bearer test-token"})
+
+    yield session          # ← 用例在这里执行
+
+    session.close()        # ← 收尾：关连接、清数据</code></pre>
+
+        <p>两条经验：</p>
+        <ul>
+          <li><strong>作用域按成本定</strong>：<code>function</code>（默认，用例间完全隔离）&lt; <code>class</code> &lt; <code>module</code> &lt; <code>session</code>。建连接、读配置用 session；造用户数据用 function，别为了快而共享可变状态。</li>
+          <li><strong>共享的放 conftest.py</strong>：放在 <code>tests/</code> 下的 conftest 会被该目录及子目录自动加载，用例里不用 import，直接把夹具名写成参数就行。</li>
+        </ul>
+
+        <p>conftest 里还能注册自定义命令行参数，一套代码切环境：</p>
+        <pre><code>def pytest_addoption(parser):
+    parser.addoption("--env", action="store", default="test",
+                     help="运行环境：test / staging / prod")
+
+@pytest.fixture(scope="session")
+def env(request):
+    return request.config.getoption("--env")</code></pre>
+        <p>然后就可以 <code>pytest --env=staging</code> 了。</p>
+
+        <h2>五、mock：只测自己的逻辑</h2>
+        <p>外部依赖（第三方接口、数据库、时间、随机数）一律 mock 掉。装了 <code>pytest-mock</code> 之后，用 <code>mocker</code> 夹具即可，不用操心 <code>patch</code> 的启停：</p>
+        <pre><code>def test_display_name_with_mock(mocker):
+    client = mocker.Mock()
+    client.fetch.return_value = {"id": 1, "name": " chopper ", "active": True}
+
+    service = UserService(client)
+
+    assert service.display_name(1) == "Chopper"
+    client.fetch.assert_called_once_with(1)     # 顺带校验调用方式
+
+
+def test_monkeypatch_env(monkeypatch):
+    """monkeypatch 是内置夹具，适合改环境变量、改配置值。"""
+    monkeypatch.setenv("API_TOKEN", "abc123")</code></pre>
+        <blockquote>打补丁要打在「被查找的地方」，不是「定义的地方」。<code>from a import f</code> 之后再 <code>mocker.patch("a.f")</code> 是无效的，得 patch 使用方模块里的名字。</blockquote>
+
+        <h2>六、接口测试：拦掉真实 HTTP</h2>
+        <p>接口用例最怕不稳定。<code>responses</code> 直接在请求层拦截，不启服务、不依赖后端，跑起来又快又稳：</p>
+        <pre><code>@responses.activate
+def test_get_order_by_id(base_url):
+    responses.add(
+        responses.GET,
+        f"{base_url}/orders/1001",
+        json={"id": 1001, "status": "paid", "amount": 59.9},
+        status=200,
+    )
+
+    resp = requests.get(f"{base_url}/orders/1001", timeout=5)
+
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["status"] == "paid"
+    assert body["amount"] &lt; 100</code></pre>
+        <p>参数化 + mock 组合起来，可以把所有状态分支一次枚举完：<code>@pytest.mark.parametrize("status", ["paid", "unpaid", "refunded"])</code>。</p>
+        <p>测试数据别手写死，用 <code>faker</code> 每次生成不一样的：</p>
+        <pre><code>from faker import Faker
+fake = Faker("zh_CN")
+
+payload = {"name": fake.name(), "phone": fake.phone_number()}</code></pre>
+        <p>看似琐碎，但硬编码数据最容易漏掉边界：超长姓名、带区号的电话、含 emoji 的地址。</p>
+
+        <h2>七、UI 测试：Playwright + POM</h2>
+        <p>2026 年新项目选 Playwright 基本没有争议：自带等待、并发、追踪，Python 版 API 也足够干净。装 <code>pytest-playwright</code> 后直接能用 <code>page</code> 夹具。</p>
+        <p>关键是别把选择器写进用例里。<strong>页面对象模型（POM）</strong>把页面结构收在一处：</p>
+        <pre><code>class SearchPage:
+    def __init__(self, page: Page):
+        self.page = page
+        self.input = page.locator("#q")
+        self.button = page.locator("#go")
+        self.results = page.locator("#results li")
+
+    def open(self, url):
+        self.page.goto(url)
+        return self                    # 返回 self 好做链式调用
+
+    def search(self, keyword):
+        self.input.fill(keyword)
+        self.button.click()
+        return self
+
+    def result_texts(self):
+        return self.results.all_inner_texts()</code></pre>
+        <p>用例就只剩「做什么」和「期望什么」：</p>
+        <pre><code>@pytest.mark.ui
+def test_search_filters(search_page):
+    search_page.search("果")
+    expect(search_page.results).to_have_count(1)
+    assert "苹果" in search_page.result_texts()</code></pre>
+        <p>三条避坑经验：</p>
+        <ul>
+          <li><strong>永远别 <code>time.sleep</code></strong>。用 <code>expect(...).to_have_*</code>，它会自动重试到超时，这是 Playwright 相对 Selenium 最大的效率来源。</li>
+          <li><strong>UI 用例不要依赖外网</strong>。示例工程里用 <code>file://</code> 打开本地 <code>demo.html</code>，离线也能跑，CI 里也不会因为第三方站点抖动而红。</li>
+          <li><strong>UI 只做主干，别做穷举</strong>。等价类、边界值这些应该压在接口和单元测试层——测试金字塔不是口号，是维护成本的账。</li>
+        </ul>
+
+        <h2>八、覆盖率：知道哪里没测</h2>
+        <pre><code>pytest --cov=src --cov-report=term-missing --cov-report=html</code></pre>
+        <p><code>term-missing</code> 会直接列出没覆盖到的行号，比一个孤零零的百分比有用得多。追求 100% 覆盖率没有意义，但<strong>「新增代码有没有被测到」</strong>必须有答案——把覆盖率阈值放进 CI 就够用了。</p>
+
+        <h2>九、Allure 报告：让结果能拿去汇报</h2>
+        <pre><code>pytest --alluredir=allure-results
+allure serve allure-results      # 需要本机装 Allure CLI（依赖 Java 8+）</code></pre>
+        <p>装 <code>allure-pytest</code> 后，用装饰器给用例加上业务语义，报告才不是一堆函数名：</p>
+        <pre><code>import allure
+
+@allure.epic("订单中心")
+@allure.feature("订单查询")
+@allure.story("按 ID 查询已支付订单")
+def test_get_order_by_id(base_url):
+    with allure.step("请求订单详情"):
+        ...
+    allure.attach("请求参数", '{"id": 1001}', allure.attachment_type.JSON)</code></pre>
+        <p>失败截图也可以一并塞进报告，UI 用例尤其建议加：</p>
+        <pre><code>@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    outcome = yield
+    report = outcome.get_result()
+    if report.when == "call" and report.failed:
+        page = item.funcargs.get("page")
+        if page:
+            allure.attach(page.screenshot(), "失败截图",
+                          allure.attachment_type.PNG)</code></pre>
+        <p>这段放 conftest.py 里，全局生效。</p>
+
+        <h2>十、接进 CI：跑不起来的测试等于没有</h2>
+        <pre><code>name: test
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - run: playwright install --with-deps chromium
+      - run: pytest --cov=src --cov-report=xml --alluredir=allure-results
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: allure-results
+          path: allure-results</code></pre>
+        <p>最后一步的 <code>if: always()</code> 很重要：测试失败时也要把结果传上来，否则红灯了你却看不到报告。</p>
+
+        <h2>十一、命令速查</h2>
+        <table>
+          <thead>
+            <tr><th>命令</th><th>作用</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>pytest</code></td><td>跑全部用例</td></tr>
+            <tr><td><code>pytest -m smoke</code></td><td>只跑冒烟</td></tr>
+            <tr><td><code>pytest -m "not ui"</code></td><td>跳过 UI（无需浏览器）</td></tr>
+            <tr><td><code>pytest -k zero</code></td><td>按名字关键字挑用例</td></tr>
+            <tr><td><code>pytest -x -q</code></td><td>首次失败即停，安静输出</td></tr>
+            <tr><td><code>pytest --lf</code></td><td>只跑上次失败的</td></tr>
+            <tr><td><code>pytest --env=staging</code></td><td>自定义参数切环境</td></tr>
+            <tr><td><code>pytest --cov=src --cov-report=html</code></td><td>生成覆盖率网页</td></tr>
+          </tbody>
+        </table>
+
+        <h2>十二、跑起来看看</h2>
+        <p>示例工程在 <code>D:/AI/python-testing-demo/</code>，装完依赖直接跑（没装浏览器时先跳过 UI）：</p>
+        <pre><code>$ pytest -m "not ui" -q --cov=src --cov-report=term-missing
+
+....................                                            [100%]
+Name                  Stmts   Miss  Cover   Missing
+---------------------------------------------------
+src\calculator.py        11      0   100%
+src\user_service.py      11      1    91%   8
+---------------------------------------------------
+TOTAL                    22      1    95%
+20 passed, 3 deselected in 1.66s</code></pre>
+        <p>20 条通过、3 条 UI 用例被筛掉，全程 1.66 秒。<code>user_service.py</code> 第 8 行没覆盖是故意留的——那行是真实 HTTP 实现的占位，本来就不该进单元测试。</p>
+
+        <h2>十三、几个新手一定会踩的坑</h2>
+        <ul>
+          <li><strong>用例之间有依赖</strong>：A 用例造的数据被 B 用，结果单独跑 B 就红。每个用例必须能独立运行，数据一律用 fixture 造、用 fixture 清。</li>
+          <li><strong>fixture 作用域开太大</strong>：为了「快」把可变状态提到 session 级，很快就会出现莫名其妙的偶发失败。</li>
+          <li><strong>mock 打错位置</strong>：patch 的是使用方模块里的名字，不是定义处。</li>
+          <li><strong>断言太弱</strong>：<code>assert resp</code> 等于没写。要断言状态码、关键字段、字段类型。</li>
+          <li><strong>UI 用例当功能测试用</strong>：一条 UI 用例几秒到几十秒，几百条之后 CI 就没人愿意等了。</li>
+        </ul>
+
+        <h2>小结</h2>
+        <p>整套体系拆开看其实只有五件事：<strong>用例怎么写（断言 + 参数化）、准备工作怎么复用（fixture + conftest）、外部依赖怎么隔离（mock + responses）、UI 怎么组织（Playwright + POM）、结果怎么交付（覆盖率 + Allure + CI）</strong>。</p>
+        <p>先把这套最小闭环跑通，再往里加数据库测试、异步测试、并发跑批、AI 辅助定位——那时候你补的就是能力，而不是在补地基。回头看那张导图，主干这几条也就都点亮了。</p>
+
+        <div class="post-nav">
+          <a href="../blog.html">← 返回博客</a>
+          <a href="../works/python-testing-mindmap.html">配套：Python 自动化测试学习导图 →</a>
+        </div>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div>
+        <h4>Chopper · 拾光集</h4>
+        <p style="color:#c9c0b1;max-width:30ch;margin:0">在代码与文字之间，记录生长的样子。</p>
+      </div>
+      <div>
+        <h4>导航</h4>
+        <ul class="footer-links">
+          <li><a href="../works.html">作品</a></li>
+          <li><a href="../blog.html">博客</a></li>
+          <li><a href="../about.html">关于</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>在外围</h4>
+        <ul class="footer-links">
+          <li><a href="https://github.com/" target="_blank" rel="noopener">GitHub</a></li>
+          <li><a href="mailto:hello@example.com">Email</a></li>
+          <li><a href="https://www.zhihu.com/" target="_blank" rel="noopener">知乎</a></li>
+        </ul>
+      </div>
+      <div class="footer-note">© <span id="year">2026</span> Chopper · 拾光集 · 基于纯静态构建，可托管于任意静态平台</div>
+    </div>
+  </footer>
+
+  <script src="../assets/js/main.js"></script>
+</body>
+</html>

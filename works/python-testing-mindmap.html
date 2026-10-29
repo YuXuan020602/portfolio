@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Python 自动化测试 · 学习思维导图 · 拾光集</title>
+  <meta name="description" content="Chopper 整理的 Python 自动化测试学习导图：pytest、Playwright、Locust、Allure、CI 与 AI 辅助测试，一条可落地的学习路径与工具选型。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Noto+Sans+SC:wght@300;400;500&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="wrap nav">
+      <a href="../index.html" class="brand">拾光集 <span class="en">ShiGuang</span></a>
+      <button class="nav-toggle" aria-label="菜单"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="../index.html">首页</a></li>
+        <li><a href="../works.html" class="active">作品</a></li>
+        <li><a href="../blog.html">博客</a></li>
+        <li><a href="../about.html">关于</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap mm-wrap">
+
+      <div class="article-header">
+        <p class="date">2026 · 10 · 28</p>
+        <h1>Python 自动化测试 · 学习思维导图</h1>
+        <p class="excerpt">从工程基础到测试框架、接口 / UI / 性能测试、报告 CI 与 AI 辅助测试——一张图梳理可落地的学习路径与工具选型。</p>
+        <div class="mm-legend">
+          <span><i style="background:#7c8a5a"></i>主干能力</span>
+          <span><i style="background:#b98b6f"></i>2026 推荐 / 趋势</span>
+        </div>
+      </div>
+
+      <!-- 思维导图 -->
+      <div class="mm-card">
+        <div class="mm-scroll" id="mm-map">
+          <pre class="mermaid">
+mindmap
+  root((Python 自动化测试))
+    语言与工程基础
+      Python 语法与数据结构
+      虚拟环境 venv poetry
+      包管理 pip
+      装饰器与上下文管理器
+      文件IO与正则
+    测试框架
+      pytest 主流首选
+      unittest 标准库
+      fixtures 夹具
+      参数化 parametrize
+      断言库 assertpy
+    接口 API 测试
+      requests httpx
+      pytest 组织用例
+      mock 服务 responses
+      schema 校验 pydantic
+    UI 端到端测试
+      Playwright 新项目首选
+      Selenium 遗留系统
+      Appium 移动端
+      页面对象模型 POM
+    性能与压测
+      Locust
+      pytest-benchmark
+      k6
+    测试数据与 Mock
+      faker 假数据
+      factory_boy
+      pytest-mock
+      vcrpy 录制回放
+      Docker 依赖隔离
+    报告与 CI
+      Allure 报告
+      pytest-html
+      coverage 覆盖率
+      GitHub Actions
+      tox pre-commit
+    专项能力
+      数据库测试
+      异步测试 pytest-asyncio
+      测试设计方法
+      故障排查
+      AI 辅助测试趋势
+    学习资源
+      pytest 官方文档
+      Real Python
+      TestGuild
+      Martin Fowler 博客
+      掘金 知乎 测试窝
+          </pre>
+        </div>
+        <div class="mm-fallback" id="mm-fallback">
+          <p>导图需要联网加载 Mermaid 渲染库。<br />当前未能加载成功，可刷新重试，或直接查看下方「学习路径」与「工具清单」表格。</p>
+        </div>
+      </div>
+
+      <!-- 学习路径 -->
+      <div class="article-body">
+        <h2>一、需要掌握的知识点（建议顺序）</h2>
+        <ol>
+          <li><strong>Python 工程基础</strong>——语法与数据结构、函数与类、异常处理；虚拟环境 <code>venv</code> / <code>poetry</code>、包管理 <code>pip</code>；<strong>装饰器与上下文管理器</strong>（理解 pytest fixture 的关键）；文件 IO、正则、JSON / YAML。</li>
+          <li><strong>测试核心概念</strong>——单元 / 集成 / E2E 的边界；测试金字塔；测试替身（stub / mock / fake）与测试隔离；等价类、边界值、场景法等用例设计方法。</li>
+          <li><strong>pytest 体系</strong>——<code>fixtures</code> 夹具、<code>parametrize</code> 参数化、<code>conftest.py</code> 组织、插件机制与断言重写。</li>
+          <li><strong>分层测试能力</strong>——接口 / API 测试、UI / E2E 测试、性能压测、数据库测试；异步测试 <code>pytest-asyncio</code>；测试数据构造。</li>
+          <li><strong>工程化</strong>——覆盖率 <code>coverage</code>、报告 Allure、CI 集成（GitHub Actions）、<code>tox</code> / <code>pre-commit</code>。</li>
+          <li><strong>趋势认知</strong>——AI 辅助测试：自愈定位、用例生成、失败分析。</li>
+        </ol>
+
+        <h2>二、相关工具清单</h2>
+        <table>
+          <thead>
+            <tr><th>类别</th><th>推荐工具</th><th>说明</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>测试框架</td><td>pytest（首选）、unittest</td><td>pytest 插件生态最完善，新项目直接用</td></tr>
+            <tr><td>接口 / API</td><td>requests / httpx、responses、pydantic</td><td>mock 服务 + schema 校验</td></tr>
+            <tr><td>UI / E2E</td><td>Playwright（新项目首选）、Selenium（遗留）、Appium（移动端）</td><td>2026 年 Playwright 采用率已超 Selenium</td></tr>
+            <tr><td>性能 / 压测</td><td>Locust、pytest-benchmark、k6</td><td>Python 写压测脚本首推 Locust</td></tr>
+            <tr><td>测试数据</td><td>faker、factory_boy、pytest-mock、vcrpy</td><td>假数据 / Mock / 录制回放</td></tr>
+            <tr><td>报告 / CI</td><td>Allure、pytest-html、coverage、GitHub Actions、tox</td><td>主流架构 = pytest + Allure + Page Object</td></tr>
+            <tr><td>AI 辅助</td><td>Healenium（开源自愈）、Testim、Mabl、Octomind</td><td>趋势方向，先了解即可</td></tr>
+          </tbody>
+        </table>
+
+        <blockquote>建议路径：工程基础 → pytest → 接口测试 → UI 测试 → 报告与 CI → 专项能力与 AI 辅助。先把手写脚本跑通，再谈框架与平台化。</blockquote>
+      </div>
+
+      <!-- 学习资源 -->
+      <div style="margin-top:2.6rem">
+        <h2 style="font-size:1.6rem;margin:0 0 1rem">三、推荐学习资源</h2>
+        <div class="mm-res">
+          <a href="https://docs.pytest.org/" target="_blank" rel="noopener"><b>pytest 官方文档</b><span>最权威的 pytest 用法与插件生态入口</span></a>
+          <a href="https://realpython.com/tutorials/testing/" target="_blank" rel="noopener"><b>Real Python · Testing</b><span>大量可跟练的英文测试教程（含 pytest / mocking）</span></a>
+          <a href="https://testguild.com/" target="_blank" rel="noopener"><b>TestGuild</b><span>测试自动化趋势、框架榜单与播客</span></a>
+          <a href="https://martinfowler.com/testing/" target="_blank" rel="noopener"><b>Martin Fowler · Testing</b><span>测试金字塔、微服务测试等经典方法论</span></a>
+          <a href="https://playwright.dev/python/" target="_blank" rel="noopener"><b>Playwright for Python</b><span>新项目 UI / E2E 首选框架官方文档</span></a>
+          <a href="https://locust.io/" target="_blank" rel="noopener"><b>Locust</b><span>Python 写性能 / 压测脚本的首选</span></a>
+          <a href="https://allurereport.org/" target="_blank" rel="noopener"><b>Allure Report</b><span>好看且信息丰富的测试报告</span></a>
+          <a href="https://juejin.cn/" target="_blank" rel="noopener"><b>掘金 / 知乎</b><span>中文实战与踩坑分享，搜「pytest」「Playwright」</span></a>
+        </div>
+      </div>
+
+      <p class="mm-note">本图由 Mermaid 渲染，可左右滚动查看完整结构。持续更新中——学到哪，就往图上补哪。</p>
+
+      <div class="mm-actions">
+        <a href="../works.html" class="btn btn--primary">返回作品集 →</a>
+        <a href="../blog.html" class="btn btn--ghost">读读博客</a>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div>
+        <h4>Chopper · 拾光集</h4>
+        <p style="color:#c9c0b1;max-width:30ch;margin:0">在代码与文字之间，记录生长的样子。</p>
+      </div>
+      <div>
+        <h4>导航</h4>
+        <ul class="footer-links">
+          <li><a href="../works.html">作品</a></li>
+          <li><a href="../blog.html">博客</a></li>
+          <li><a href="../about.html">关于</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>在外围</h4>
+        <ul class="footer-links">
+          <li><a href="https://github.com/" target="_blank" rel="noopener">GitHub</a></li>
+          <li><a href="mailto:hello@example.com">Email</a></li>
+          <li><a href="https://www.zhihu.com/" target="_blank" rel="noopener">知乎</a></li>
+        </ul>
+      </div>
+      <div class="footer-note">© <span id="year">2026</span> Chopper · 拾光集 · 基于纯静态构建，可托管于任意静态平台</div>
+    </div>
+  </footer>
+
+  <script src="../assets/js/main.js"></script>
+  <script>
+    /* 加载 Mermaid（带备用 CDN），失败则显示降级提示 */
+    (function () {
+      var urls = [
+        "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js",
+        "https://unpkg.com/mermaid@11/dist/mermaid.min.js"
+      ];
+      function load(i) {
+        if (i >= urls.length) { fail(); return; }
+        var s = document.createElement("script");
+        s.src = urls[i];
+        s.onload = function () { init(); };
+        s.onerror = function () { load(i + 1); };
+        document.head.appendChild(s);
+      }
+      function init() {
+        if (!window.mermaid) { fail(); return; }
+        window.mermaid.initialize({
+          startOnLoad: true,
+          theme: "base",
+          themeVariables: {
+            primaryColor: "#fffdf9",
+            lineColor: "#b98b6f",
+            primaryTextColor: "#33302b",
+            fontSize: "15px"
+          }
+        });
+      }
+      function fail() {
+        var fb = document.getElementById("mm-fallback");
+        var map = document.getElementById("mm-map");
+        if (fb) fb.style.display = "block";
+        if (map) map.style.display = "none";
+      }
+      load(0);
+    })();
+  </script>
+</body>
+</html>

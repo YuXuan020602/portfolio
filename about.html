@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>关于 · 拾光集</title>
+  <meta name="description" content="关于Chopper：一名全栈开发者与写作者。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Noto+Sans+SC:wght@300;400;500&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="wrap nav">
+      <a href="index.html" class="brand">拾光集 <span class="en">ShiGuang</span></a>
+      <button class="nav-toggle" aria-label="菜单"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="index.html">首页</a></li>
+        <li><a href="works.html">作品</a></li>
+        <li><a href="blog.html">博客</a></li>
+        <li><a href="about.html">关于</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main>
+    <section class="section">
+      <div class="wrap about-grid">
+        <div>
+          <img class="avatar" src="assets/img/avatar.jpg" alt="Chopper的头像" style="max-width:260px" />
+        </div>
+        <div>
+          <p class="eyebrow">About Me</p>
+          <h2 class="section-title">你好，我是Chopper</h2>
+          <p>一名全栈开发者，也是个业余写作者。过去六年里，我在创业团队做过从 0 到 1 的产品，也在开源社区里慢慢攒下了一点星星。</p>
+          <p>我相信好的工具应当像好文章一样：克制、清晰、留有余地。这个站点本身，就是我对「清新文艺也能很工程化」的一次实践——纯静态、零依赖、随手就能托管。</p>
+          <h3 style="margin-top:1.8rem">我常用的</h3>
+          <ul class="skill-list">
+            <li><b>前端</b> React / Vue / Svelte</li>
+            <li><b>后端</b> Node / Go / Python</li>
+            <li><b>数据</b> PostgreSQL / Redis</li>
+            <li><b>工程</b> Docker / CI / 可观测</li>
+            <li><b>设计</b> 排版 / 交互 / 动效</li>
+            <li><b>写作</b> 技术文 / 随笔</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--alt" id="contact">
+      <div class="wrap" style="text-align:center">
+        <p class="eyebrow">Get in Touch</p>
+        <h2 class="section-title">联系我</h2>
+        <p class="section-lead" style="margin-left:auto;margin-right:auto">无论是产品想法、技术难题，还是只想交个朋友，都欢迎写信给我。</p>
+        <div style="display:flex;gap:.9rem;justify-content:center;flex-wrap:wrap;margin-top:1rem">
+          <a href="mailto:hello@example.com" class="btn btn--primary">hello@example.com</a>
+          <a href="https://github.com/" target="_blank" rel="noopener" class="btn btn--ghost">GitHub</a>
+          <a href="https://www.zhihu.com/" target="_blank" rel="noopener" class="btn btn--ghost">知乎</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div>
+        <h4>Chopper · 拾光集</h4>
+        <p style="color:#c9c0b1;max-width:30ch;margin:0">在代码与文字之间，记录生长的样子。</p>
+      </div>
+      <div>
+        <h4>导航</h4>
+        <ul class="footer-links">
+          <li><a href="works.html">作品</a></li>
+          <li><a href="blog.html">博客</a></li>
+          <li><a href="about.html">关于</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>在外围</h4>
+        <ul class="footer-links">
+          <li><a href="https://github.com/" target="_blank" rel="noopener">GitHub</a></li>
+          <li><a href="mailto:hello@example.com">Email</a></li>
+          <li><a href="https://www.zhihu.com/" target="_blank" rel="noopener">知乎</a></li>
+        </ul>
+      </div>
+      <div class="footer-note">© <span id="year">2026</span> Chopper · 拾光集 · 基于纯静态构建，可托管于任意静态平台</div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>作品 · 拾光集</title>
+  <meta name="description" content="Chopper的精选作品集：Web 应用、开源工具与数据可视化项目。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Noto+Sans+SC:wght@300;400;500&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="wrap nav">
+      <a href="index.html" class="brand">拾光集 <span class="en">ShiGuang</span></a>
+      <button class="nav-toggle" aria-label="菜单"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="index.html">首页</a></li>
+        <li><a href="works.html">作品</a></li>
+        <li><a href="blog.html">博客</a></li>
+        <li><a href="about.html">关于</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main>
+    <section class="section">
+      <div class="wrap">
+        <p class="eyebrow">Portfolio</p>
+        <h2 class="section-title">作品集</h2>
+        <p class="section-lead">点击分类筛选。每个项目都仍在生长——这里记录的是它们此刻的样子。</p>
+
+        <div class="filters" data-filter-group=".work-item">
+          <button class="filter active" data-filter="all">全部</button>
+          <button class="filter" data-filter="web">Web 应用</button>
+          <button class="filter" data-filter="oss">开源工具</button>
+          <button class="filter" data-filter="viz">数据可视化</button>
+          <button class="filter" data-filter="ai">AI</button>
+          <button class="filter" data-filter="map">学习地图</button>
+        </div>
+
+        <div class="grid grid--works">
+          <article class="card work-item" data-cat="map">
+            <div class="thumb">Mindmap</div>
+            <span class="tag">学习地图</span>
+            <h3>Python 自动化测试学习导图</h3>
+            <p>从工程基础到 pytest、Playwright、Locust、Allure 与 AI 辅助测试，一张图梳理可落地的学习路径与工具选型。</p>
+            <div class="meta"><span>Python</span><span>pytest</span><span>Mermaid</span></div>
+            <a href="works/python-testing-mindmap.html" class="more">查看导图 →</a>
+          </article>
+          <article class="card work-item" data-cat="web">
+            <div class="thumb">Verdant</div>
+            <span class="tag">Web 应用</span>
+            <h3>Verdant 协作白板</h3>
+            <p>基于 WebSocket 的实时协作画布，支持多人光标、图形与便签，前端用 Canvas 手写渲染引擎，单机可承载百人同屏。</p>
+            <div class="meta"><span>React</span><span>Node</span><span>WebSocket</span></div>
+            <a href="#" class="more">查看演示 →</a>
+          </article>
+          <article class="card work-item" data-cat="oss">
+            <div class="thumb">Lumen</div>
+            <span class="tag">开源工具</span>
+            <h3>Lumen 静态站点生成器</h3>
+            <p>零配置、以 Markdown 为中心的静态博客生成器，专注中文排版与阅读体验，构建时间稳定 < 200ms。</p>
+            <div class="meta"><span>Go</span><span>CLI</span><span>2.1k ★</span></div>
+            <a href="#" class="more">GitHub →</a>
+          </article>
+          <article class="card work-item" data-cat="viz">
+            <div class="thumb">Atlas</div>
+            <span class="tag">数据可视化</span>
+            <h3>Atlas 数据看板</h3>
+            <p>面向中小团队的可视化看板，拖拽式图表配置，内置十余种数据源连接器，导出即静态页面。</p>
+            <div class="meta"><span>Vue</span><span>D3</span><span>TS</span></div>
+            <a href="#" class="more">查看演示 →</a>
+          </article>
+          <article class="card work-item" data-cat="ai">
+            <div class="thumb">Muse</div>
+            <span class="tag">AI</span>
+            <h3>Muse 写作助手</h3>
+            <p>本地优先的 AI 写作伙伴，把模型跑在浏览器里，写作时零数据出端，保护每一句私密。</p>
+            <div class="meta"><span>WASM</span><span>LLM</span><span>PWA</span></div>
+            <a href="#" class="more">了解更多 →</a>
+          </article>
+          <article class="card work-item" data-cat="web">
+            <div class="thumb">Kettle</div>
+            <span class="tag">Web 应用</span>
+            <h3>Kettle 习惯打卡</h3>
+            <p>极简习惯追踪，强调「不破三日」的温柔节奏，数据本地加密存储，支持离线使用。</p>
+            <div class="meta"><span>Svelte</span><span>IndexedDB</span></div>
+            <a href="#" class="more">查看演示 →</a>
+          </article>
+          <article class="card work-item" data-cat="oss">
+            <div class="thumb">Inkwell</div>
+            <span class="tag">开源工具</span>
+            <h3>Inkwell 排版库</h3>
+            <p>一套为中文网页而生的基础排版样式，自动处理标点挤压、行距与首字下沉，已被多个博客采用。</p>
+            <div class="meta"><span>CSS</span><span>Open Source</span></div>
+            <a href="#" class="more">GitHub →</a>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div>
+        <h4>Chopper · 拾光集</h4>
+        <p style="color:#c9c0b1;max-width:30ch;margin:0">在代码与文字之间，记录生长的样子。</p>
+      </div>
+      <div>
+        <h4>导航</h4>
+        <ul class="footer-links">
+          <li><a href="works.html">作品</a></li>
+          <li><a href="blog.html">博客</a></li>
+          <li><a href="about.html">关于</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>在外围</h4>
+        <ul class="footer-links">
+          <li><a href="https://github.com/" target="_blank" rel="noopener">GitHub</a></li>
+          <li><a href="mailto:hello@example.com">Email</a></li>
+          <li><a href="https://www.zhihu.com/" target="_blank" rel="noopener">知乎</a></li>
+        </ul>
+      </div>
+      <div class="footer-note">© <span id="year">2026</span> Chopper · 拾光集 · 基于纯静态构建，可托管于任意静态平台</div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

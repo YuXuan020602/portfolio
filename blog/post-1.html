@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>用 Canvas 手写一个协作白板渲染引擎 · 拾光集</title>
+  <meta name="description" content="从脏矩形重绘到光标插值，聊聊 Verdant 协作白板里的性能优化。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Noto+Sans+SC:wght@300;400;500&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="wrap nav">
+      <a href="../index.html" class="brand">拾光集 <span class="en">ShiGuang</span></a>
+      <button class="nav-toggle" aria-label="菜单"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="../index.html">首页</a></li>
+        <li><a href="../works.html">作品</a></li>
+        <li><a href="../blog.html">博客</a></li>
+        <li><a href="../about.html">关于</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main>
+    <article class="section article">
+      <div class="article-header wrap">
+        <div class="date">2026 · 10 · 12</div>
+        <h1>用 Canvas 手写一个协作白板渲染引擎</h1>
+        <p class="excerpt">从脏矩形重绘到光标插值，聊聊我在 Verdant 里踩过的性能坑。</p>
+      </div>
+
+      <div class="wrap article-body">
+        <p>做协作白板最容易被低估的，不是实时同步，而是渲染。当画布上有了几百个图形、十几个人的光标在同时移动，浏览器很快就会用掉你所有的帧预算。下面是我在这个项目里逐步摸索出的一套做法。</p>
+
+        <h2>一、不要全量重绘</h2>
+        <p>最初我天真地每帧调用一次 <code>clearRect</code> 再画全部元素，结果 200 个图形就掉到了 20fps。真正的开关是脏矩形：只重绘发生变化的最小区域。</p>
+        <pre><code>function invalidate(rect) {
+  dirty.push(rect);
+  scheduleFrame();
+}
+
+function render() {
+  for (const r of dirty) ctx.clearRect(r.x, r.y, r.w, r.h);
+  for (const item of visibleIn(dirty)) draw(item);
+  dirty.length = 0;
+}</code></pre>
+
+        <h2>二、光标要做插值</h2>
+        <p>网络消息再频繁也有间隔，直接把远端光标「瞬移」过去会显得很卡。我们在收到坐标后做线性插值，让视觉保持连续：</p>
+        <blockquote>流畅感往往不是来自更高的帧率，而是来自更可预测的运动。</blockquote>
+        <p>用 <code>requestAnimationFrame</code> 在每帧里把光标位置朝目标值逼近一点，体感立刻顺滑起来。</p>
+
+        <h2>三、分层画布</h2>
+        <p>把静态图形与动态光标分到两张 Canvas 上：静态层很少重绘，动态层每帧轻量更新。这样既省 GPU，也让脏矩形逻辑更干净。</p>
+        <ul>
+          <li>底图 / 图形层：变化少，缓存离屏</li>
+          <li>光标 / 选区层：每帧更新，独立合成</li>
+          <li>网格层：用 CSS 背景平铺，完全不进 Canvas</li>
+        </ul>
+
+        <h2>小结</h2>
+        <p>最终我们在百人同屏下稳住了 60fps。核心经验只有一句：把「画什么」和「什么时候画」彻底分开想，性能问题就解决了一大半。</p>
+
+        <div class="post-nav">
+          <a href="../blog.html">← 返回博客</a>
+          <a href="post-2.html">下一篇：为什么我写了第三个静态站点生成器 →</a>
+        </div>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div>
+        <h4>Chopper · 拾光集</h4>
+        <p style="color:#c9c0b1;max-width:30ch;margin:0">在代码与文字之间，记录生长的样子。</p>
+      </div>
+      <div>
+        <h4>导航</h4>
+        <ul class="footer-links">
+          <li><a href="../works.html">作品</a></li>
+          <li><a href="../blog.html">博客</a></li>
+          <li><a href="../about.html">关于</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>在外围</h4>
+        <ul class="footer-links">
+          <li><a href="https://github.com/" target="_blank" rel="noopener">GitHub</a></li>
+          <li><a href="mailto:hello@example.com">Email</a></li>
+          <li><a href="https://www.zhihu.com/" target="_blank" rel="noopener">知乎</a></li>
+        </ul>
+      </div>
+      <div class="footer-note">© <span id="year">2026</span> Chopper · 拾光集 · 基于纯静态构建，可托管于任意静态平台</div>
+    </div>
+  </footer>
+
+  <script src="../assets/js/main.js"></script>
+</body>
+</html>

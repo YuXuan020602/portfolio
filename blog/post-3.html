@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>清新文艺风，也能很工程化 · 拾光集</title>
+  <meta name="description" content="一套纯静态作品集主题的设计取舍：配色、排版与零依赖的坚持。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Noto+Sans+SC:wght@300;400;500&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="wrap nav">
+      <a href="../index.html" class="brand">拾光集 <span class="en">ShiGuang</span></a>
+      <button class="nav-toggle" aria-label="菜单"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="../index.html">首页</a></li>
+        <li><a href="../works.html">作品</a></li>
+        <li><a href="../blog.html">博客</a></li>
+        <li><a href="../about.html">关于</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main>
+    <article class="section article">
+      <div class="article-header wrap">
+        <div class="date">2026 · 09 · 05</div>
+        <h1>清新文艺风，也能很工程化</h1>
+        <p class="excerpt">一套纯静态作品集主题的设计取舍：配色、排版与零依赖的坚持。本文就基于它写成。</p>
+      </div>
+
+      <div class="wrap article-body">
+        <p>很多人以为「清新文艺」和「工程化」是两回事：前者讲感觉，后者讲规范。但我在这个站点上想证明的是——气质和纪律并不冲突。你正在看的这页，就是用一套零依赖、纯静态的模板生成的。</p>
+
+        <h2>配色：从自然里借</h2>
+        <p>主色我选了鼠尾草绿，辅色是暖陶土。它们都来自植物与泥土，所以放在一起天然舒服，不会刺眼。背景用偏暖的米白，而不是纯白——纯白在屏幕上有点冷，米白更像纸。</p>
+        <blockquote>颜色不是装饰，是情绪的底色。</blockquote>
+
+        <h2>排版：留白是呼吸</h2>
+        <p>正文行距给到 1.75，段落之间留出足够的空气。标题用衬线体（Noto Serif SC），正文用无衬线（Noto Sans SC），中英混排时英文用一款有书卷气的衬线（Cormorant Garamond）做点缀。</p>
+        <ul>
+          <li>标题衬线，正文无衬线，层级靠字重与字号拉开</li>
+          <li>长文首字下沉，增加阅读仪式感</li>
+          <li>引用块用细左边线 + 斜体，安静但不弱</li>
+        </ul>
+
+        <h2>工程化：零依赖的坚持</h2>
+        <p>整个站点没有任何构建步骤、没有 npm 依赖。改一个字，刷新即可见；丢到任何静态托管上，立刻上线。这对个人作品集尤其重要——你不该为了维护一个博客，而背上整套工具链的维护成本。</p>
+        <pre><code>portfolio-site/
+├── index.html
+├── works.html
+├── blog.html
+├── about.html
+├── blog/
+└── assets/
+    ├── css/style.css
+    └── js/main.js</code></pre>
+
+        <h2>小结</h2>
+        <p>所谓「工程化」，未必是复杂的流水线，也可以是「让简单的事保持简单」的自律。清新文艺的外表下，是一颗不想被依赖拖垮的心。</p>
+
+        <div class="post-nav">
+          <a href="post-2.html">← 上一篇：为什么我写了第三个静态站点生成器</a>
+          <a href="../blog.html">返回博客 →</a>
+        </div>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div>
+        <h4>Chopper · 拾光集</h4>
+        <p style="color:#c9c0b1;max-width:30ch;margin:0">在代码与文字之间，记录生长的样子。</p>
+      </div>
+      <div>
+        <h4>导航</h4>
+        <ul class="footer-links">
+          <li><a href="../works.html">作品</a></li>
+          <li><a href="../blog.html">博客</a></li>
+          <li><a href="../about.html">关于</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>在外围</h4>
+        <ul class="footer-links">
+          <li><a href="https://github.com/" target="_blank" rel="noopener">GitHub</a></li>
+          <li><a href="mailto:hello@example.com">Email</a></li>
+          <li><a href="https://www.zhihu.com/" target="_blank" rel="noopener">知乎</a></li>
+        </ul>
+      </div>
+      <div class="footer-note">© <span id="year">2026</span> Chopper · 拾光集 · 基于纯静态构建，可托管于任意静态平台</div>
+    </div>
+  </footer>
+
+  <script src="../assets/js/main.js"></script>
+</body>
+</html>

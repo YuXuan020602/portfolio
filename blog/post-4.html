@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>第 8 章 Route Guidance（路线引导）深度解析 · 拾光集</title>
+  <meta name="description" content="苹果 CarPlay 附录（iAP2）第 8 章 Route Guidance 路线引导的机制、状态机、数据流时序与工程要点解析。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Noto+Sans+SC:wght@300;400;500&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="wrap nav">
+      <a href="../index.html" class="brand">拾光集 <span class="en">ShiGuang</span></a>
+      <button class="nav-toggle" aria-label="菜单"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="../index.html">首页</a></li>
+        <li><a href="../works.html">作品</a></li>
+        <li><a href="../blog.html">博客</a></li>
+        <li><a href="../about.html">关于</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main>
+    <article class="section article">
+      <div class="article-header wrap">
+        <div class="date">2026 · 10 · 28</div>
+        <h1>第 8 章 Route Guidance（路线引导）深度解析</h1>
+        <p class="excerpt">拆解苹果 CarPlay 附录（iAP2）中，iPhone 如何把转向引导数据下发给车机，以及工程实现时必须踩准的硬指标。</p>
+      </div>
+
+      <div class="wrap article-body">
+        <p>这份文档是苹果《配件接口规范 · CarPlay 附录》（iAP2 协议的 CarPlay 补充规范）R11 开发者预览版。第 8 章定义了 <strong>iPhone 导航（Apple Maps / CarPlay 中的第三方导航 App）如何把"转向引导数据"下发给车机（配件 / Accessory）</strong>，让车机用自己的导航渲染能力（中控屏、仪表、HUD）显示苹果下发的引导信息。</p>
+        <p>一句话概括：<strong>CarPlay 投屏显示之外，车机若想用自己的 UI 呈现 CarPlay 导航的转向提示，必须走本章的 iAP2 消息通道。</strong></p>
+
+        <h2>一、本章在文档中的定位</h2>
+        <p>路线引导功能使设备（iPhone）能够向配件（车机）提供转向引导（turn-by-turn）及路线引导元数据。如果配件使用其内置导航系统提供的元数据来呈现导航指令（在中控主屏、仪表盘或抬头显示器上），那么它也必须使用 CarPlay 提供的元数据做同样的呈现。</p>
+
+        <h2>二、核心机制解析</h2>
+
+        <h3>1. 强制性要求（8.1）</h3>
+        <p>支持 Route Guidance 的车机<strong>必须</strong>实现 5 条 iAP2 控制会话消息：</p>
+        <table>
+          <thead>
+            <tr><th>消息</th><th>方向</th><th>作用</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>StartRouteGuidanceUpdates</code></td><td>车机 → iPhone</td><td>订阅 / 开启引导数据流</td></tr>
+            <tr><td><code>RouteGuidanceUpdate</code></td><td>iPhone → 车机</td><td>引导总状态更新（状态、ETA、距离等）</td></tr>
+            <tr><td><code>RouteGuidanceManeuverInformation</code></td><td>iPhone → 车机</td><td>单个"机动动作"（转向）详细信息</td></tr>
+            <tr><td><code>StopRouteGuidanceUpdates</code></td><td>车机 → iPhone</td><td>停止订阅</td></tr>
+            <tr><td><code>LaneGuidanceInformation</code></td><td>iPhone → 车机</td><td>车道级引导信息</td></tr>
+          </tbody>
+        </table>
+
+        <h3>2. 身份识别与显示区域声明（8.2 前半）</h3>
+        <ul>
+          <li>车机必须先<strong>自我识别</strong>：通过 <code>RouteGuidanceDisplayComponent</code> 参数组（Table 17-50）<strong>逐个声明每一个显示引导数据的区域</strong>（中控主屏、仪表、HUD 各算一个），每个区域要报告<strong>可容纳的最大字符数</strong>，iPhone 据此优化路名等文本的排版。</li>
+          <li>若 iPhone 不支持这些消息，会<strong>拒绝所有包含这些消息的识别请求</strong>——即这是能力协商的一部分。</li>
+        </ul>
+
+        <h3>3. 数据流时序</h3>
+        <pre><code>车机声明 DisplayComponents → 发 StartRouteGuidanceUpdates
+    （携带 MaxGuidanceManeuverStorageCapacity / MaxLaneGuidanceStorageCapacity，
+      即车机最多能缓存几条机动/车道信息）
+→ iPhone 为每个 DisplayComponent 各发一条初始 RouteGuidanceUpdate（全量）
+→ iPhone 按容量上限发送若干条 ManeuverInformation 和 LaneGuidanceInformation（初始全量）
+→ 行进过程中：增量更新 + 接近路口时的 "diff" 动态更新
+→ 结束时 RouteGuidanceState = NoRouteSet</code></pre>
+
+        <h3>4. 关键状态机与强制行为（8.2 后半，工程实现重点）</h3>
+        <table>
+          <thead>
+            <tr><th>要求</th><th>说明</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>初始状态</td><td>收到第一条 <code>RouteGuidanceUpdate</code> 前，必须假定 <code>No Route Set</code></td></tr>
+            <tr><td>缓存清理</td><td>收到 <code>RouteGuidanceState = NoRouteSet</code> 时，<strong>必须清空所有缓存的机动信息</strong></td></tr>
+            <tr><td>400ms 呈现时限</td><td><code>RouteGuidanceUpdate</code> 或 <code>ManeuverInformation</code> 的内容<strong>必须在 400ms 内呈现给用户</strong>——本章最硬的实时性指标，也是认证测试项</td></tr>
+            <tr><td>ETA 时区显示</td><td>预计到达时间必须加上 <code>DestinationTimeZoneOffsetMinutes</code>（跨时区场景）；老设备兼容时退回用 <code>TimeZoneOffsetMinutes</code>（DeviceTimeUpdate）</td></tr>
+            <tr><td>状态判断</td><td>CarPlay 里的导航 App <strong>不一定</strong>支持 iAP2 Route Guidance，车机逻辑必须用 <code>RouteGuidanceState</code> + <code>SourceSupportsRouteGuidance</code> 参数判断何时展示</td></tr>
+            <tr><td>数据安全红线</td><td><strong>禁止</strong>把路线引导信息发往外部（包括远程服务器），<strong>禁止</strong>持久化存储，只能用于"向用户显示"和"电动车充电准备"两个用途</td></tr>
+          </tbody>
+        </table>
+
+        <h3>5. 走错路的处理（重路由机制）</h3>
+        <p>车机可以丢弃所有索引小于当前索引集（<code>RouteGuidanceManeuverCurrentList</code>）的机动消息。司机走错时，iPhone 有两种恢复方式：</p>
+        <ol>
+          <li>用新路线<strong>覆写</strong>后续索引的机动消息；或</li>
+          <li>从下一个可用索引开始发送新消息，随后发一条 <code>RouteGuidanceUpdate</code> 指定新的当前索引。</li>
+        </ol>
+
+        <h3>6. 机动状态机（8.3.3 示例）</h3>
+        <p>接近路口时，Maneuver 状态按固定节奏流转：</p>
+        <pre><code>Continue → Initial → Prepare → Execute → Continue</code></pre>
+        <p><code>ManeuverType</code> 指定动作类型（如右转）；车道引导由 <code>PresentLaneGuidance = TRUE/FALSE</code> 控制显示开关，<code>LaneGuidanceCurrentIndex</code> 指示当前所处车道组。</p>
+
+        <h2>三、两个示例的工程含义（8.3）</h2>
+        <ul>
+          <li><strong>图 8-1 普通路口</strong>（三岔 / 斜交路口）：<code>ManeuverType: 1</code>（直行类）、<code>DrivingSide: 0</code>（左侧通行图例）、<code>JunctionType: 0</code>（普通路口），出口角 <code>-58°</code>，两个入口角 <code>28°</code>、<code>70°</code>——角度参数用于车机自绘路口大图（junction view）。</li>
+          <li><strong>图 8-2 环岛</strong>：<code>ManeuverType: 28</code>（环岛类）、<code>JunctionType: 1</code>（环岛），4 个入口角（-89°、-54°、-28°、19°）+ 出口角 64°，描述 5 口环岛的几何形状。</li>
+        </ul>
+        <blockquote>即：iPhone 不下发渲染图，只下发<strong>几何参数</strong>，路口放大图由车机自行绘制——这就是为什么每个 DisplayComponent 要报字符容量、角度要精确到度。</blockquote>
+
+        <h2>四、与认证的关系（8.4）</h2>
+        <p>自认证（self-certification）测试程序仅向<strong>已获批产品计划（approved product plans）</strong>的配件厂商开放。工程上需要重点准备的测试项：<strong>400ms 呈现时限</strong>、状态机转换正确性、<code>NoRouteSet</code> 时的缓存清空、以及<strong>数据不得外传</strong>的合规检查。</p>
+
+        <h2>五、给实施团队的要点清单</h2>
+        <ol>
+          <li>显示组件声明要覆盖<strong>所有</strong>渲染引导的区域（含 HUD / 仪表），漏报会导致对应区域拿不到适配文本。</li>
+          <li>缓存容量参数（<code>MaxGuidanceManeuverStorageCapacity</code> 等）要按车机真实能力申报，报小了丢数据，报大了内存压力。</li>
+          <li>400ms 端到端呈现是硬指标，链路设计（iAP2 接收 → 解析 → UI 渲染）要整体预算。</li>
+          <li>路线数据<strong>严禁出车头单元</strong>（TSP 云端、日志上传都算违规），架构设计时就要隔离。</li>
+        </ol>
+
+        <hr />
+
+        <h2>附录：原文全文翻译</h2>
+        <blockquote>
+          <p><strong>8 路线引导（Route Guidance）</strong></p>
+          <p>路线引导功能使设备（iPhone）能够向配件（车机）提供转向引导（turn-by-turn）及路线引导元数据。如果配件使用其内置导航系统提供的元数据来呈现导航指令（在中控主屏、仪表盘或抬头显示器上），那么它也必须使用 CarPlay 提供的元数据做同样的呈现。</p>
+
+          <p><strong>8.1 要求</strong></p>
+          <p>所有通过 iAP2 支持路线引导功能的配件，必须能够发送或接收以下 iAP2 控制会话消息：</p>
+          <ul>
+            <li><code>StartRouteGuidanceUpdates</code>（第 258 页）</li>
+            <li><code>RouteGuidanceUpdate</code>（第 258 页）</li>
+            <li><code>RouteGuidanceManeuverInformation</code>（第 263 页）</li>
+            <li><code>StopRouteGuidanceUpdates</code>（第 267 页）</li>
+            <li><code>LaneGuidanceInformation</code>（第 267 页）</li>
+          </ul>
+
+          <p><strong>8.2 用法</strong></p>
+          <p>支持路线引导的配件在发送或接收上述必需消息之前，必须先进行自我识别。如果设备不支持任何路线引导消息，它将拒绝所有包含这些消息的识别请求。</p>
+          <p>配件必须使用 <code>RouteGuidanceDisplayComponent</code> 对每一个显示路线引导数据的显示区域分别进行识别。参见"表 17-50 RouteGuidanceDisplayComponent 参数组"（第 283 页）。</p>
+          <p>每个 <code>RouteGuidanceDisplayComponent</code> 映射到车辆中一个显示路线引导数据的区域。每个组件包含该显示区域可容纳的最大字符数，以便文本（路名等）能够被格式化为最适合该显示区域的形式。</p>
+          <p>配件发给设备的 <code>StartRouteGuidanceUpdates</code> 消息会启动设备生成 <code>RouteGuidanceUpdate</code> 消息。</p>
+          <p>路线引导开始后，设备会针对每个 <code>RouteGuidanceDisplayComponent</code> 各发送一条 <code>RouteGuidanceUpdate</code> 消息。这些初始消息包含车辆维持路线引导状态所需的全部信息。</p>
+          <p>设备还会发送多条 <code>RouteGuidanceManeuverInformation</code> 消息和多条 <code>LaneGuidanceInformation</code> 消息。消息数量受配件在 <code>StartRouteGuidanceUpdates</code> 消息中的 <code>MaxGuidanceManeuverStorageCapacity</code> 参数和 <code>MaxLaneGuidanceStorageCapacity</code> 参数所请求的更新数量限制。</p>
+          <p>此外，当驾驶员接近路口时，设备可以发送 <code>RouteGuidanceManeuverInformation</code> "diff"（差量）更新，以动态刷新显示。</p>
+          <p>配件可以丢弃所有索引小于当前索引集（<code>RouteGuidanceManeuverCurrentList</code>）的 <code>RouteGuidanceManeuverInformation</code> 消息。例如，如果驾驶员转弯错误，设备可以用新路线更新后续已索引的 <code>RouteGuidanceManeuverInformation</code> 消息，也可以从下一个可用索引开始发送新的 <code>RouteGuidanceManeuverInformation</code> 消息，随后发送一条 <code>RouteGuidanceUpdate</code> 消息并指定一个新的 <code>RouteGuidanceManeuverInformation</code> 消息索引作为当前索引。</p>
+          <p>配件如果希望停止向驾驶员显示路线引导信息，或无法继续显示时，可以随时发送 <code>StopRouteGuidanceUpdates</code> 消息。</p>
+          <p>在收到第一条 <code>RouteGuidanceUpdate</code> 消息之前，配件必须假定路线引导状态（<code>RouteGuidanceState</code>）为 No Route Set（未设置路线）。</p>
+          <p>当收到 <code>RouteGuidanceState</code> 为 No Route Set 的 <code>RouteGuidanceUpdate</code> 消息时，配件必须清除所有已缓存的机动动作信息。</p>
+          <p><code>RouteGuidanceUpdate</code> 消息或 <code>RouteGuidanceManeuverInformation</code> 消息中包含的信息必须在 400 毫秒内呈现给用户。</p>
+          <p>当使用 <code>EstimatedTimeOfArrival</code>（预计到达时间）向用户呈现到达目的地的预计时间时，配件必须加上 <code>DestinationTimeZoneOffsetMinutes</code>（目的地时区偏移分钟数），以确保向用户显示的时间对目的地时区是正确的。为向后兼容较旧的设备，如果 <code>RouteGuidanceUpdate</code> 消息中未提供 <code>DestinationTimeZoneOffsetMinutes</code>，配件必须改为加上 <code>TimeZoneOffsetMinutes</code>（参见《配件接口规范》中的"DeviceTimeUpdate"）。</p>
+          <p>在 CarPlay 中提供转向引导的应用会设置转向导航应用状态（参见"应用状态"，第 164 页）。CarPlay 中可用的导航应用可能不支持 iAP2 路线引导功能，因此配件必须在判断何时向用户呈现路线引导数据的逻辑中使用 <code>RouteGuidanceUpdate</code> 消息的 <code>RouteGuidanceState</code> 和 <code>SourceSupportsRouteGuidance</code> 参数。</p>
+          <p><strong>禁止配件将路线引导信息发送给外部来源，包括但不限于远程服务器。</strong>配件不得持久化存储路线引导信息，也不得将其用于向用户显示路线引导以及准备电动车充电之外的任何用途。</p>
+
+          <p><strong>8.3 示例</strong></p>
+          <p><strong>8.3.1 普通路口示例</strong></p>
+          <p>图 8-1（第 230 页）所描绘的路口元素将具有以下 <code>RouteGuidanceManeuverInformation</code> 参数：</p>
+          <ul>
+            <li><code>ManeuverType</code>：1</li>
+            <li><code>DrivingSide</code>：0</li>
+            <li><code>JunctionType</code>：0</li>
+            <li><code>JunctionElementExitAngle</code>：-58</li>
+            <li><code>JunctionElementAngle</code>：28</li>
+            <li><code>JunctionElementAngle</code>：70</li>
+          </ul>
+          <p><strong>8.3.2 环岛路口示例</strong></p>
+          <p>图 8-2（第 231 页）所描绘的路口元素将具有以下 <code>RouteGuidanceManeuverInformation</code> 参数：</p>
+          <ul>
+            <li><code>ManeuverType</code>：28</li>
+            <li><code>DrivingSide</code>：0</li>
+            <li><code>JunctionType</code>：1</li>
+            <li><code>JunctionElementAngle</code>：-89</li>
+            <li><code>JunctionElementAngle</code>：-54</li>
+            <li><code>JunctionElementAngle</code>：-28</li>
+            <li><code>JunctionElementAngle</code>：19</li>
+            <li><code>JunctionElementExitAngle</code>：64</li>
+          </ul>
+          <p><strong>8.3.3 用法示例</strong></p>
+          <ol>
+            <li>配件使用一个或多个 <code>RouteGuidanceDisplayComponent</code> 进行识别。</li>
+            <li>配件发送 <code>StartRouteGuidanceUpdates</code> 消息。</li>
+            <li>设备开始生成 <code>RouteGuidanceUpdate</code> 消息。
+              <ul>
+                <li>如果路线引导未激活：<code>RouteGuidanceState</code> 参数设为 NoRouteSet，等待路线引导开始。</li>
+                <li>如果路线引导已激活：<code>RouteGuidanceState</code> 参数设为 Route Set、Loading、Locating、Rerouting 或 Proceed to Route。</li>
+              </ul>
+            </li>
+            <li>设备发送携带初始路线引导机动动作的 <code>RouteGuidanceManeuverInformation</code> 消息，数量不超过配件可处理的最大机动动作数。<code>RouteGuidanceState</code> 设为 Active，路线引导处于激活状态。</li>
+            <li>设备发送携带初始车道引导信息列表的 <code>LaneGuidanceInformation</code> 消息，数量不超过配件指定的最大值。</li>
+            <li>随着时间和行驶里程推移，设备发送 <code>RouteGuidanceUpdate</code>、<code>RouteGuidanceManeuverInformation</code> 和 <code>LaneGuidanceInformation</code> 消息以更新信息。
+              <ul>
+                <li>接近某个机动动作时，Maneuver 状态按 Continue → Initial → Prepare → Execute → Continue 转换。<code>ManeuverType</code> 参数指定机动动作类型（例如右转）。</li>
+                <li>如果需要显示车道引导，<code>LaneGuidanceCurrentIndex</code> 参数被更新，<code>PresentLaneGuidance</code> 参数设为 TRUE，表示应显示车道引导。当不再需要显示车道引导时，<code>PresentLaneGuidance</code> 参数设为 FALSE。</li>
+                <li>重复以上过程，直到路线引导结束。</li>
+              </ul>
+            </li>
+            <li>如果用户行驶到达目的地，设备发送 <code>RouteGuidanceState</code> 设为 Arrived 的 <code>RouteGuidanceUpdate</code> 消息。</li>
+            <li>当路线引导结束——无论是因已到达目的地，还是用户选择结束路线引导——设备发送 <code>RouteGuidanceState</code> 设为 NoRouteSet 的 <code>RouteGuidanceUpdate</code> 消息。</li>
+          </ol>
+
+          <p><strong>8.4 测试程序</strong></p>
+          <p>自认证的测试程序仅面向已获批产品计划的配件制造商提供。</p>
+        </blockquote>
+
+        <p style="margin-top:2rem;font-size:.85rem;color:var(--ink-soft)">原文发布于 CSDN：<a href="https://blog.csdn.net/2301_79492603/article/details/167914682" target="_blank" rel="noopener">第 8 章 Route Guidance（路线引导）深度解析</a>。本文为作者本人转载至个人作品集。</p>
+
+        <div class="post-nav">
+          <a href="post-3.html">← 上一篇：清新文艺风，也能很工程化</a>
+          <a href="../blog.html">返回博客 →</a>
+        </div>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div>
+        <h4>Chopper · 拾光集</h4>
+        <p style="color:#c9c0b1;max-width:30ch;margin:0">在代码与文字之间，记录生长的样子。</p>
+      </div>
+      <div>
+        <h4>导航</h4>
+        <ul class="footer-links">
+          <li><a href="../works.html">作品</a></li>
+          <li><a href="../blog.html">博客</a></li>
+          <li><a href="../about.html">关于</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>在外围</h4>
+        <ul class="footer-links">
+          <li><a href="https://github.com/" target="_blank" rel="noopener">GitHub</a></li>
+          <li><a href="mailto:hello@example.com">Email</a></li>
+          <li><a href="https://www.zhihu.com/" target="_blank" rel="noopener">知乎</a></li>
+        </ul>
+      </div>
+      <div class="footer-note">© <span id="year">2026</span> Chopper · 拾光集 · 基于纯静态构建，可托管于任意静态平台</div>
+    </div>
+  </footer>
+
+  <script src="../assets/js/main.js"></script>
+</body>
+</html>

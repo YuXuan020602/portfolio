@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>博客 · 拾光集</title>
+  <meta name="description" content="Chopper的技术博客：关于工程实践、开源与产品设计的文章。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Noto+Sans+SC:wght@300;400;500&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="wrap nav">
+      <a href="index.html" class="brand">拾光集 <span class="en">ShiGuang</span></a>
+      <button class="nav-toggle" aria-label="菜单"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="index.html">首页</a></li>
+        <li><a href="works.html">作品</a></li>
+        <li><a href="blog.html">博客</a></li>
+        <li><a href="about.html">关于</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main>
+    <section class="section">
+      <div class="wrap">
+        <p class="eyebrow">The Blog</p>
+        <h2 class="section-title">文字与思考</h2>
+        <p class="section-lead">多数关于工程，偶尔关于生活。不追热点，只写真正想明白的事。</p>
+
+        <div class="filters" data-filter-group=".post-item">
+          <button class="filter active" data-filter="all">全部</button>
+          <button class="filter" data-filter="eng">工程</button>
+          <button class="filter" data-filter="oss">开源</button>
+          <button class="filter" data-filter="design">设计</button>
+        </div>
+
+        <div class="grid grid--posts">
+          <article class="card post-item post-card" data-cat="eng">
+            <div class="date">2026 · 10 · 28</div>
+            <h3>Python 自动化测试入门实战：从第一个用例到 Allure 报告</h3>
+            <p>断言与参数化、fixture 与 conftest、mock、接口测试、Playwright + POM、覆盖率与 Allure，附一套跑得起来的示例工程。</p>
+            <a href="blog/post-5.html" class="more">阅读全文 →</a>
+          </article>
+          <article class="card post-item post-card" data-cat="eng">
+            <div class="date">2026 · 10 · 28</div>
+            <h3>第 8 章 Route Guidance（路线引导）深度解析</h3>
+            <p>拆解苹果 CarPlay 附录（iAP2）中，iPhone 如何把转向引导数据下发给车机，以及工程实现时必须踩准的硬指标。</p>
+            <a href="blog/post-4.html" class="more">阅读全文 →</a>
+          </article>
+          <article class="card post-item post-card" data-cat="eng">
+            <div class="date">2026 · 10 · 12</div>
+            <h3>用 Canvas 手写一个协作白板渲染引擎</h3>
+            <p>从脏矩形重绘到光标插值，聊聊我在 Verdant 里踩过的性能坑，以及最终如何把百人同屏压到 60fps。</p>
+            <a href="blog/post-1.html" class="more">阅读全文 →</a>
+          </article>
+          <article class="card post-item post-card" data-cat="oss">
+            <div class="date">2026 · 09 · 28</div>
+            <h3>为什么我写了第三个静态站点生成器</h3>
+            <p>Lumen 的诞生记：对「写作体验」的偏执，以及如何把构建时间压到 200ms 以内。</p>
+            <a href="blog/post-2.html" class="more">阅读全文 →</a>
+          </article>
+          <article class="card post-item post-card" data-cat="design">
+            <div class="date">2026 · 09 · 05</div>
+            <h3>清新文艺风，也能很工程化</h3>
+            <p>一套纯静态作品集主题的设计取舍：配色、排版与零依赖的坚持。本文就基于它写成。</p>
+            <a href="blog/post-3.html" class="more">阅读全文 →</a>
+          </article>
+          <article class="card post-item post-card" data-cat="eng">
+            <div class="date">2026 · 08 · 17</div>
+            <h3>前端状态管理的三次顿悟</h3>
+            <p>从 Redux 到信号（Signals），我对「状态」的理解经历了三次转折，每次都推翻了上一次。</p>
+            <a href="blog/post-1.html" class="more">阅读全文 →</a>
+          </article>
+          <article class="card post-item post-card" data-cat="oss">
+            <div class="date">2026 · 07 · 30</div>
+            <h3>把开源项目做到 1k Star 之后</h3>
+            <p>维护者的孤独、Issue 的海、以及如何在「免费」与「可持续」之间找平衡。</p>
+            <a href="blog/post-2.html" class="more">阅读全文 →</a>
+          </article>
+          <article class="card post-item post-card" data-cat="design">
+            <div class="date">2026 · 07 · 09</div>
+            <h3>留白不是空，是呼吸</h3>
+            <p>聊聊排版里最容易被忽略、也最影响气质的那件事。</p>
+            <a href="blog/post-3.html" class="more">阅读全文 →</a>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div>
+        <h4>Chopper · 拾光集</h4>
+        <p style="color:#c9c0b1;max-width:30ch;margin:0">在代码与文字之间，记录生长的样子。</p>
+      </div>
+      <div>
+        <h4>导航</h4>
+        <ul class="footer-links">
+          <li><a href="works.html">作品</a></li>
+          <li><a href="blog.html">博客</a></li>
+          <li><a href="about.html">关于</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>在外围</h4>
+        <ul class="footer-links">
+          <li><a href="https://github.com/" target="_blank" rel="noopener">GitHub</a></li>
+          <li><a href="mailto:hello@example.com">Email</a></li>
+          <li><a href="https://www.zhihu.com/" target="_blank" rel="noopener">知乎</a></li>
+        </ul>
+      </div>
+      <div class="footer-note">© <span id="year">2026</span> Chopper · 拾光集 · 基于纯静态构建，可托管于任意静态平台</div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+</body>
+</html>
